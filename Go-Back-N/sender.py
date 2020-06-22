@@ -1,13 +1,12 @@
 import _thread
 import socket
-import sys
 import time
 
 import packet
 import udt
 from timer import Timer
 
-PACKET_SIZE = 512
+PACKET_SIZE = 1024
 RECEIVER_ADDR = ('localhost', 8080)
 SENDER_ADDR = ('localhost', 0)
 SLEEP_INTERVAL = 0.05
@@ -115,13 +114,12 @@ def receive(sock):
 
 # Main function
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print('Expected filename as command line argument')
-        exit()
-
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(SENDER_ADDR)
-    filename = sys.argv[1]
+    filename = "../data/small-data.txt"
 
+    start_time = time.time()
     send(sock, filename)
     sock.close()
+    print("--- %s seconds ---" % (time.time() - start_time))
+
