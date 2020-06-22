@@ -6,7 +6,7 @@ import packet
 import udt
 from timer import Timer
 
-PACKET_SIZE = 1024
+PACKET_SIZE = 512
 RECEIVER_ADDR = ('localhost', 8080)
 SENDER_ADDR = ('localhost', 0)
 SLEEP_INTERVAL = 0.05

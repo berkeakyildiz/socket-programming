@@ -1,4 +1,3 @@
-# udt.py - Unreliable data transfer using UDP
 import random
 import socket
 

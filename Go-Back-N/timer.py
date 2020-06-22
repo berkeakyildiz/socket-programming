@@ -1,4 +1,3 @@
-# timer.py - A timer class
 import time
 
 

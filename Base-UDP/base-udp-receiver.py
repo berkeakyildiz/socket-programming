@@ -1,8 +1,8 @@
 import socket
 import time
 
-import packet
-import udt
+import baseudppacket as packet
+import baseudpudt as udt
 
 RECEIVER_ADDR = ('localhost', 8080)
 
@@ -16,28 +16,13 @@ def receive(sock, filename):
         print('Unable to open', filename)
         return
 
-    expected_num = 0
     while True:
         # Get the next packet from the sender
         pkt, addr = udt.recv(sock)
         if not pkt:
             break
-        seq_num, data = packet.extract(pkt)
-        print('Got packet', seq_num)
-
-        # Send back an ACK
-        if seq_num == expected_num:
-            print('Got expected packet')
-            print('Sending ACK', expected_num)
-            pkt = packet.make(expected_num)
-            udt.send(pkt, sock, addr)
-            expected_num += 1
-            file.write(data)
-        else:
-            print('Sending ACK', expected_num - 1)
-            pkt = packet.make(expected_num - 1)
-            udt.send(pkt, sock, addr)
-
+        data = packet.extract_datagram(pkt)
+        file.write(data)
     file.close()
 
 
@@ -45,8 +30,9 @@ def receive(sock, filename):
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(RECEIVER_ADDR)
-    filename = "../received-data/received_small_data.txt"
+    filename = "/home/bakyildiz/PycharmProjects/socket-programming/received-data/received_small_data.txt"
     start_time = time.time()
+    print("READY TO RECEIVE")
     receive(sock, filename)
     sock.close()
     print("--- %s seconds ---" % (time.time() - start_time))

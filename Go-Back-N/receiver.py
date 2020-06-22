@@ -1,4 +1,3 @@
-# receiver.py - The receiver in the reliable data transer protocol
 import socket
 import time
 
