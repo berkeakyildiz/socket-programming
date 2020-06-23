@@ -21,14 +21,15 @@ def receive(sock, filename):
         if pkt_count == 0:
             start_time = time.time()
             print("Start time: " + str(start_time))
-        if not pkt:
-            break
-        data = packet.extract_datagram(pkt)
-        file.write(data)
-        pkt_count += 1
-        print("received: " + str(pkt_count))
+        if pkt:
+            data = packet.extract_datagram(pkt)
+            file.write(data)
+            pkt_count += 1
+            print("received: " + str(pkt_count))
 
-        print("--- %s seconds ---" % (time.time() - start_time))
+            print("--- %s seconds ---" % (time.time() - start_time))
+        else:
+            break
     file.close()
 
 

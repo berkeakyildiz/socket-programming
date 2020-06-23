@@ -34,7 +34,7 @@ def send(sock, filename, drop_prob):
     while True:
         if next_to_send < len(packets):
             udt.send(packets[next_to_send], sock, RECEIVER_ADDR, drop_prob)
-            time.sleep(SLEEP_INTERVAL)
+            # time.sleep(SLEEP_INTERVAL)
             next_to_send += 1
             print("sent: " + str(next_to_send))
         else:
@@ -50,8 +50,8 @@ if __name__ == '__main__':
     #     exit()
     # filename = sys.argv[1]
     # drop_prob = sys.argv[2]
-    filename = "/home/bakyildiz/PycharmProjects/socket-programming/data/small-data.txt"
-    drop_prob = 0.004
+    filename = "/home/bakyildiz/PycharmProjects/socket-programming/data/medium-data.txt"
+    drop_prob = 0.01
     print("READY TO SEND")
     send(sock, filename, drop_prob)
     sock.close()

@@ -3,8 +3,8 @@ import socket
 
 
 def send(packet, sock, addr, drop_prob):
-    # if random.random() > drop_prob:
-    sock.sendto(packet, addr)
+    if random.random() > drop_prob:
+        sock.sendto(packet, addr)
     return
 
 
