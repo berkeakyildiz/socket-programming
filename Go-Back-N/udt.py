@@ -4,15 +4,12 @@ import socket
 DROP_PROB = 8
 
 
-# Send a packet across the unreliable channel
-# Packet may be lost
-def send(packet, sock, addr):
-    if random.randint(0, DROP_PROB) > 0:
+def send(packet, sock, addr, drop_prob):
+    if random.random() > drop_prob:
         sock.sendto(packet, addr)
     return
 
 
-# Receive a packet from the unreliable channel
 def recv(sock):
     packet, addr = sock.recvfrom(1024)
     return packet, addr

@@ -24,7 +24,7 @@ def set_window_size(num_packets):
     return min(WINDOW_SIZE, num_packets - base)
 
 
-def send(sock, filename):
+def send(sock, filename, drop_prob):
     global mutex
     global base
     global send_timer
@@ -56,7 +56,7 @@ def send(sock, filename):
         mutex.acquire()
         while next_to_send < base + window_size:
             print('Sending packet', next_to_send)
-            udt.send(packets[next_to_send], sock, RECEIVER_ADDR)
+            udt.send(packets[next_to_send], sock, RECEIVER_ADDR, drop_prob)
             next_to_send += 1
 
         if not send_timer.running():
@@ -78,7 +78,7 @@ def send(sock, filename):
             window_size = set_window_size(num_packets)
         mutex.release()
 
-    udt.send(packet.make_empty(), sock, RECEIVER_ADDR)
+    udt.send(packet.make_empty(), sock, RECEIVER_ADDR, drop_prob)
     file.close()
 
 
@@ -95,7 +95,6 @@ def receive(sock):
         if ack >= base:
             mutex.acquire()
             base = ack + 1
-            print('Base updated', base)
             send_timer.stop()
             mutex.release()
 
@@ -104,14 +103,16 @@ if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(SENDER_ADDR)
     # if len(sys.argv) != 3:
-    #     print('Expected filename as command line argument')
+    #     print('Expected filename, drop_prob and window_size as command line argument')
     #     exit()
     # filename = sys.argv[1]
-    # WINDOW_SIZE = sys.argv[1]
-    filename = "../data/small-data.txt"
-
+    # drop_prob = sys.argv[2]
+    # WINDOW_SIZE = sys.argv[3]
+    WINDOW_SIZE = 8
+    filename = "../data/medium-data.txt"
+    drop_prob = 0.004
     start_time = time.time()
-    send(sock, filename)
+    send(sock, filename, drop_prob)
     sock.close()
     print("--- %s seconds ---" % (time.time() - start_time))
 
