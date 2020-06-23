@@ -1,4 +1,3 @@
-# Creates an empty packet
 def make_empty():
     return b''
 

@@ -11,16 +11,13 @@ SENDER_ADDR = ('localhost', 0)
 SLEEP_INTERVAL = 0.05
 
 
-# Send thread
 def send(sock, filename):
-    # Open the file
     try:
         file = open(filename, 'rb')
     except IOError:
         print('Unable to open', filename)
         return
 
-    # Add all the packets to the buffer
     packets = []
     while True:
         data = file.read(PACKET_SIZE)
@@ -40,7 +37,6 @@ def send(sock, filename):
         print("sent: " + str(next_to_send))
 
 
-# Main function
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(SENDER_ADDR)
