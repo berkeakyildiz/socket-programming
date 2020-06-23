@@ -45,7 +45,7 @@ if __name__ == '__main__':
     #     exit()
     # filename = sys.argv[1]
     # drop_prob = sys.argv[2]
-    filename = "../received-data/received.txt"
+    filename = "/home/bakyildiz/PycharmProjects/socket-programming/received-data/received.txt"
     drop_prob = 0.004
     start_time = time.time()
     receive(sock, filename, drop_prob)

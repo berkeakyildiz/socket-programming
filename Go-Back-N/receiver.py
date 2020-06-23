@@ -1,6 +1,6 @@
 import socket
-import time
 import sys
+import time
 
 import packet
 import udt

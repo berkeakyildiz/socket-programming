@@ -16,7 +16,7 @@ WINDOW_SIZE = 4
 
 base = 0
 mutex = _thread.allocate_lock()
-send_timer = Timer(TIMEOUT_INTERVAL)
+timers = []
 
 
 def set_window_size(num_packets):
@@ -27,7 +27,7 @@ def set_window_size(num_packets):
 def send(sock, filename, drop_prob):
     global mutex
     global base
-    global send_timer
+    global timers
 
     try:
         file = open(filename, 'rb')
@@ -51,6 +51,8 @@ def send(sock, filename, drop_prob):
     base = 0
 
     _thread.start_new_thread(receive, (sock,))
+    for x in range(num_packets):
+        timers.append(Timer(TIMEOUT_INTERVAL))
 
     while base < num_packets:
         mutex.acquire()
@@ -59,19 +61,19 @@ def send(sock, filename, drop_prob):
             udt.send(packets[next_to_send], sock, RECEIVER_ADDR, drop_prob)
             next_to_send += 1
 
-        if not send_timer.running():
+        if not timers[base].running():
             print('Starting timer')
-            send_timer.start()
+            timers[base].start()
 
-        while send_timer.running() and not send_timer.timeout():
+        while timers[base].running() and not timers[base].timeout():
             mutex.release()
             print('Sleeping')
             time.sleep(SLEEP_INTERVAL)
             mutex.acquire()
 
-        if send_timer.timeout():
+        if timers[base].timeout():
             print('Timeout')
-            send_timer.stop()
+            timers[base].stop()
             next_to_send = base
         else:
             print('Shifting window')
@@ -85,7 +87,7 @@ def send(sock, filename, drop_prob):
 def receive(sock):
     global mutex
     global base
-    global send_timer
+    global timers
 
     while True:
         pkt, _ = udt.recv(sock)
@@ -95,7 +97,8 @@ def receive(sock):
         if ack >= base:
             mutex.acquire()
             base = ack + 1
-            send_timer.stop()
+            if timers[base].running():
+                timers[base].stop()
             mutex.release()
 
 
@@ -108,7 +111,7 @@ if __name__ == '__main__':
     # filename = sys.argv[1]
     # drop_prob = sys.argv[2]
     # WINDOW_SIZE = sys.argv[3]
-    filename = "/home/bakyildiz/PycharmProjects/socket-programming/data/small-data.txt"
+    filename = "/home/bakyildiz/PycharmProjects/socket-programming/data/medium-data.txt"
     drop_prob = 0.004
     WINDOW_SIZE = 8
     start_time = time.time()
