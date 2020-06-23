@@ -1,7 +1,7 @@
 import _thread
 import socket
-import time
 import sys
+import time
 
 import packet
 import udt
@@ -108,11 +108,10 @@ if __name__ == '__main__':
     # filename = sys.argv[1]
     # drop_prob = sys.argv[2]
     # WINDOW_SIZE = sys.argv[3]
-    WINDOW_SIZE = 4
-    filename = "../data/medium-data.txt"
+    filename = "/home/bakyildiz/PycharmProjects/socket-programming/received-data/received_small_data.txt"
     drop_prob = 0.004
+    WINDOW_SIZE = 8
     start_time = time.time()
     send(sock, filename, drop_prob)
     sock.close()
     print("--- %s seconds ---" % (time.time() - start_time))
-

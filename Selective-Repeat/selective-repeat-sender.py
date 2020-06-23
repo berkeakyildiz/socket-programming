@@ -1,118 +1,117 @@
-#!/usr/bin/python
-"""""
-@File:           ClientApp.py
-@Description:    Client Application running Selective Repeat protocol
-                 for reliable data transfer.
-@Author:         Chetan Borse
-@EMail:          chetanborse2106@gmail.com
-@Created_on:     03/23/2017
-@License         GNU General Public License
-@python_version: 2.7
-===============================================================================
-"""
+import _thread
+import socket
+import sys
+import time
 
-import os
-import argparse
+import selectiverepeatpacket as packet
+import selectiverepeatudt as udt
+from selectiverepeattimer import Timer
 
-from SelectiveRepeat.client import Sender
-from SelectiveRepeat.client import SocketError
-from SelectiveRepeat.client import FileNotExistError
-from SelectiveRepeat.client import WindowSizeError
+PACKET_SIZE = 1024
+RECEIVER_ADDR = ('localhost', 8080)
+SENDER_ADDR = ('localhost', 0)
+SLEEP_INTERVAL = 0.05
+TIMEOUT_INTERVAL = 0.5
+WINDOW_SIZE = 4
+
+base = 0
+mutex = _thread.allocate_lock()
+send_timer = Timer(TIMEOUT_INTERVAL)
 
 
-def ClientApp(**args):
-    # Arguments
-    filename = args["filename"]
-    senderIP = args["sender_ip"]
-    senderPort = args["sender_port"]
-    receiverIP = args["receiver_ip"]
-    receiverPort = args["receiver_port"]
-    sequenceNumberBits = args["sequence_number_bits"]
-    windowSize = args["window_size"]
-    maxSegmentSize = args["max_segment_size"]
-    totalPackets = args["total_packets"]
-    timeout = args["timeout"]
-    www = args["www"]
+def set_window_size(num_packets):
+    global base
+    return min(WINDOW_SIZE, num_packets - base)
 
-    # Create 'Sender' object
-    sender = Sender(senderIP,
-                    senderPort,
-                    sequenceNumberBits,
-                    windowSize,
-                    maxSegmentSize,
-                    www)
+
+def send(sock, filename, drop_prob):
+    global mutex
+    global base
+    global send_timer
 
     try:
-        # Create sending UDP socket
-        sender.open()
+        file = open(filename, 'rb')
+    except IOError:
+        print('Unable to open', filename)
+        return
 
-        # Send file to receiver
-        sender.send(filename,
-                    receiverIP,
-                    receiverPort,
-                    totalPackets,
-                    timeout)
+    packets = []
+    seq_num = 0
+    while True:
+        data = file.read(PACKET_SIZE)
+        if not data:
+            break
+        packets.append(packet.make(seq_num, data))
+        seq_num += 1
 
-        # Close sending UDP socket
-        sender.close()
-    except SocketError as e:
-        print("Unexpected exception in sending UDP socket!!")
-        print(e)
-    except FileNotExistError as e:
-        print("Unexpected exception in file to be sent!!")
-        print(e)
-    except WindowSizeError as e:
-        print("Unexpected exception in window size!!")
-        print(e)
-    except Exception as e:
-        print("Unexpected exception!")
-        print(e)
-    finally:
-        sender.close()
+    num_packets = len(packets)
+    print('Total number of packets: ', num_packets)
+    window_size = set_window_size(num_packets)
+    next_to_send = 0
+    base = 0
+
+    _thread.start_new_thread(receive, (sock,))
+
+    while base < num_packets:
+        mutex.acquire()
+        while next_to_send < base + window_size:
+            print('Sending packet', next_to_send)
+            udt.send(packets[next_to_send], sock, RECEIVER_ADDR, drop_prob)
+            next_to_send += 1
+
+        if not send_timer.running():
+            print('Starting timer')
+            send_timer.start()
+
+        while send_timer.running() and not send_timer.timeout():
+            mutex.release()
+            print('Sleeping')
+            time.sleep(SLEEP_INTERVAL)
+            mutex.acquire()
+
+        if send_timer.timeout():
+            print('Timeout')
+            send_timer.stop()
+            next_to_send = base
+        else:
+            print('Shifting window')
+            window_size = set_window_size(num_packets)
+        mutex.release()
+
+    udt.send(packet.make_empty(), sock, RECEIVER_ADDR, drop_prob)
+    file.close()
 
 
-if __name__ == "__main__":
-    # Argument parser
-    parser = argparse.ArgumentParser(description='Selective Repeat Protocol Client Application',
-                                     prog='python \
-                                           ClientApp.py \
-                                           -f <filename> \
-                                           -a <sender_ip> \
-                                           -b <sender_port> \
-                                           -x <receiver_ip> \
-                                           -y <receiver_port> \
-                                           -m <sequence_number_bits> \
-                                           -w <window_size> \
-                                           -s <max_segment_size> \
-                                           -n <total_packets> \
-                                           -t <timeout> \
-                                           -d <www>')
+def receive(sock):
+    global mutex
+    global base
+    global send_timer
 
-    parser.add_argument("-f", "--filename", type=str, default="index.html",
-                        help="File to be sent, default: index.html")
-    parser.add_argument("-a", "--sender_ip", type=str, default="127.0.0.1",
-                        help="Sender IP, default: 127.0.0.1")
-    parser.add_argument("-b", "--sender_port", type=int, default=8081,
-                        help="Sender Port, default: 8081")
-    parser.add_argument("-x", "--receiver_ip", type=str, default="127.0.0.1",
-                        help="Receiver IP, default: 127.0.0.1")
-    parser.add_argument("-y", "--receiver_port", type=int, default=8080,
-                        help="Receiver Port, default: 8080")
-    parser.add_argument("-m", "--sequence_number_bits", type=int, default=2,
-                        help="Total number of bits used in sequence numbers, default: 2")
-    parser.add_argument("-w", "--window_size", type=int, default=2,
-                        help="Window size, default: 2")
-    parser.add_argument("-s", "--max_segment_size", type=int, default=1500,
-                        help="Maximum segment size, default: 1500")
-    parser.add_argument("-n", "--total_packets", type=str, default="ALL",
-                        help="Total packets to be transmitted, default: ALL")
-    parser.add_argument("-t", "--timeout", type=int, default=10,
-                        help="Timeout, default: 10")
-    parser.add_argument("-d", "--www", type=str, default=os.path.join(os.getcwd(), "data", "sender"),
-                        help="Source folder for transmission, default: /<Current Working Directory>/data/sender/")
+    while True:
+        pkt, _ = udt.recv(sock)
+        ack, _ = packet.extract(pkt)
 
-    # Read user inputs
-    args = vars(parser.parse_args())
+        print('Got ACK', ack)
+        if ack >= base:
+            mutex.acquire()
+            base = ack + 1
+            send_timer.stop()
+            mutex.release()
 
-    # Run Client Application
-    ClientApp(**args)
+
+if __name__ == '__main__':
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind(SENDER_ADDR)
+    # if len(sys.argv) != 3:
+    #     print('Expected filename, drop_prob and window_size as command line argument')
+    #     exit()
+    # filename = sys.argv[1]
+    # drop_prob = sys.argv[2]
+    # WINDOW_SIZE = sys.argv[3]
+    filename = "/home/bakyildiz/PycharmProjects/socket-programming/data/small-data.txt"
+    drop_prob = 0.004
+    WINDOW_SIZE = 8
+    start_time = time.time()
+    send(sock, filename, drop_prob)
+    sock.close()
+    print("--- %s seconds ---" % (time.time() - start_time))
