@@ -40,12 +40,11 @@ def receive(sock, filename, drop_prob):
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(RECEIVER_ADDR)
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 3:
         print('Expected filename, drop_prob as command line argument')
         exit()
     filename = sys.argv[1]
     drop_prob = sys.argv[2]
-
     start_time = time.time()
     receive(sock, filename, drop_prob)
     sock.close()
