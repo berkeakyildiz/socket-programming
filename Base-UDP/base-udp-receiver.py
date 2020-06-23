@@ -1,5 +1,6 @@
 import socket
 import time
+import sys
 
 import baseudppacket as packet
 import baseudpudt as udt
@@ -30,6 +31,10 @@ def receive(sock, filename):
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(RECEIVER_ADDR)
+    # if len(sys.argv) != 2:
+    #     print('Expected filename as command line argument')
+    #     exit()
+    # filename = sys.argv[1]
     filename = "/home/bakyildiz/PycharmProjects/socket-programming/received-data/received_small_data.txt"
     start_time = time.time()
     print("READY TO RECEIVE")

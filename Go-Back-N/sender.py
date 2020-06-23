@@ -1,6 +1,7 @@
 import _thread
 import socket
 import time
+import sys
 
 import packet
 import udt
@@ -116,6 +117,10 @@ def receive(sock):
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(SENDER_ADDR)
+    # if len(sys.argv) != 2:
+    #     print('Expected filename as command line argument')
+    #     exit()
+    # filename = sys.argv[1]
     filename = "../data/small-data.txt"
 
     start_time = time.time()
