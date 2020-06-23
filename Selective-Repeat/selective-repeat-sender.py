@@ -51,7 +51,7 @@ def send(sock, filename, drop_prob):
     base = 0
 
     _thread.start_new_thread(receive, (sock,))
-    for x in range(num_packets+1):
+    for x in range(num_packets + 1):
         timers.append(Timer(TIMEOUT_INTERVAL))
 
     while base < num_packets:
@@ -68,7 +68,7 @@ def send(sock, filename, drop_prob):
         while timers[base].running() and not timers[base].timeout():
             mutex.release()
             print('Sleeping')
-            # time.sleep(SLEEP_INTERVAL)
+            time.sleep(SLEEP_INTERVAL)
             mutex.acquire()
 
         if timers[base].timeout():
@@ -105,15 +105,12 @@ def receive(sock):
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(SENDER_ADDR)
-    # if len(sys.argv) != 3:
-    #     print('Expected filename, drop_prob and window_size as command line argument')
-    #     exit()
-    # filename = sys.argv[1]
-    # drop_prob = sys.argv[2]
-    # WINDOW_SIZE = sys.argv[3]
-    filename = "/home/bakyildiz/PycharmProjects/socket-programming/data/medium-data.txt"
-    drop_prob = 0.004
-    WINDOW_SIZE = 8
+    if len(sys.argv) != 3:
+        print('Expected filename, drop_prob and window_size as command line argument')
+        exit()
+    filename = sys.argv[1]
+    drop_prob = sys.argv[2]
+    WINDOW_SIZE = sys.argv[3]
     start_time = time.time()
     send(sock, filename, drop_prob)
     sock.close()

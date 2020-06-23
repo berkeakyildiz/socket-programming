@@ -102,15 +102,12 @@ def receive(sock):
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(SENDER_ADDR)
-    # if len(sys.argv) != 3:
-    #     print('Expected filename, drop_prob and window_size as command line argument')
-    #     exit()
-    # filename = sys.argv[1]
-    # drop_prob = sys.argv[2]
-    # WINDOW_SIZE = sys.argv[3]
-    filename = "/home/bakyildiz/PycharmProjects/socket-programming/data/medium-data.txt"
-    drop_prob = 0.004
-    WINDOW_SIZE = 8
+    if len(sys.argv) != 3:
+        print('Expected filename, drop_prob and window_size as command line argument')
+        exit()
+    filename = sys.argv[1]
+    drop_prob = sys.argv[2]
+    WINDOW_SIZE = sys.argv[3]
     start_time = time.time()
     send(sock, filename, drop_prob)
     sock.close()
