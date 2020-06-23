@@ -49,4 +49,4 @@ if __name__ == '__main__':
     start_time = time.time()
     receive(sock, filename, drop_prob)
     sock.close()
-    print("--- %s seconds ---" % (time.time() - start_time))
+    print("---Download time: %s seconds ---" % (time.time() - start_time))

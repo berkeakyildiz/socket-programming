@@ -37,7 +37,7 @@ def send(sock, filename, drop_prob):
             print("sent: " + str(next_to_send))
         else:
             break
-    print("--- %s seconds ---" % (time.time() - start_time))
+    print("--- Upload time: %s seconds ---" % (time.time() - start_time))
 
 
 if __name__ == '__main__':

@@ -27,7 +27,7 @@ def receive(sock, filename):
             pkt_count += 1
             print("received: " + str(pkt_count))
 
-            print("--- %s seconds ---" % (time.time() - start_time))
+            print("---Download time: %s seconds ---" % (time.time() - start_time))
         else:
             break
     file.close()
@@ -36,10 +36,11 @@ def receive(sock, filename):
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(RECEIVER_ADDR)
-    if len(sys.argv) != 2:
-        print('Expected filename as command line argument')
+    if len(sys.argv) != 3:
+        print('Expected filename and drop_probability as command line argument')
         exit()
     filename = sys.argv[1]
+    drop_prob = sys.argv[2]
     print("READY TO RECEIVE")
     receive(sock, filename)
     sock.close()
