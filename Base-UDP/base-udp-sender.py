@@ -11,7 +11,7 @@ SENDER_ADDR = ('localhost', 9501)
 SLEEP_INTERVAL = 0.05
 
 
-def send(sock, filename):
+def send(sock, filename, drop_prob):
     try:
         file = open(filename, 'rb')
     except IOError:
@@ -33,7 +33,7 @@ def send(sock, filename):
     start_time = time.time()
     while True:
         if next_to_send < len(packets):
-            udt.send(packets[next_to_send], sock, RECEIVER_ADDR)
+            udt.send(packets[next_to_send], sock, RECEIVER_ADDR, drop_prob)
             time.sleep(SLEEP_INTERVAL)
             next_to_send += 1
             print("sent: " + str(next_to_send))
@@ -45,11 +45,13 @@ def send(sock, filename):
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(SENDER_ADDR)
-    # if len(sys.argv) != 2:
-    #     print('Expected filename as command line argument')
+    # if len(sys.argv) != 3:
+    #     print('Expected filename and drop_probability as command line argument')
     #     exit()
     # filename = sys.argv[1]
+    # drop_prob = sys.argv[2]
     filename = "/home/bakyildiz/PycharmProjects/socket-programming/data/small-data.txt"
+    drop_prob = 0.004
     print("READY TO SEND")
-    send(sock, filename)
+    send(sock, filename, drop_prob)
     sock.close()
