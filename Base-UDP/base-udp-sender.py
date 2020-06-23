@@ -25,8 +25,6 @@ def send(sock, filename, drop_prob):
             break
         packets.append(packet.make_datagram(data))
 
-    # # Send empty packet as sentinel
-    # udt.send(packet.make_empty(), sock, RECEIVER_ADDR)
     file.close()
     next_to_send = 0
 
@@ -45,13 +43,11 @@ def send(sock, filename, drop_prob):
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(SENDER_ADDR)
-    # if len(sys.argv) != 3:
-    #     print('Expected filename and drop_probability as command line argument')
-    #     exit()
-    # filename = sys.argv[1]
-    # drop_prob = sys.argv[2]
-    filename = "/home/bakyildiz/PycharmProjects/socket-programming/data/medium-data.txt"
-    drop_prob = 0.01
+    if len(sys.argv) != 3:
+        print('Expected filename and drop_probability as command line argument')
+        exit()
+    filename = sys.argv[1]
+    drop_prob = sys.argv[2]
     print("READY TO SEND")
     send(sock, filename, drop_prob)
     sock.close()
