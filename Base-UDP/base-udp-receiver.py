@@ -8,9 +8,7 @@ import baseudpudt as udt
 RECEIVER_ADDR = ('localhost', 8080)
 
 
-# Receive packets from the sender
 def receive(sock, filename):
-    # Open the file for writing
     try:
         file = open(filename, 'wb')
     except IOError:
@@ -18,8 +16,8 @@ def receive(sock, filename):
         return
 
     while True:
-        # Get the next packet from the sender
         pkt, addr = udt.recv(sock)
+        print(pkt)
         if not pkt:
             break
         data = packet.extract_datagram(pkt)
@@ -27,7 +25,6 @@ def receive(sock, filename):
     file.close()
 
 
-# Main function
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(RECEIVER_ADDR)
