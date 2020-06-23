@@ -1,8 +1,6 @@
 import random
 import socket
 
-DROP_PROB = 8
-
 
 def send(packet, sock, addr, drop_prob):
     if random.random() > drop_prob:

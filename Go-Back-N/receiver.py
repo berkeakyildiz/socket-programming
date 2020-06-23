@@ -9,7 +9,6 @@ RECEIVER_ADDR = ('localhost', 8080)
 
 
 def receive(sock, filename, drop_prob):
-    # Open the file for writing
     try:
         file = open(filename, 'wb')
     except IOError:

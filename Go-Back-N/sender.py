@@ -45,7 +45,7 @@ def send(sock, filename, drop_prob):
         seq_num += 1
 
     num_packets = len(packets)
-    print('I gots', num_packets)
+    print('Total number of packets: ', num_packets)
     window_size = set_window_size(num_packets)
     next_to_send = 0
     base = 0
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     # filename = sys.argv[1]
     # drop_prob = sys.argv[2]
     # WINDOW_SIZE = sys.argv[3]
-    WINDOW_SIZE = 8
+    WINDOW_SIZE = 4
     filename = "../data/medium-data.txt"
     drop_prob = 0.004
     start_time = time.time()
