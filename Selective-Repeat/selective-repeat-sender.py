@@ -51,7 +51,7 @@ def send(sock, filename, drop_prob):
     base = 0
 
     _thread.start_new_thread(receive, (sock,))
-    for x in range(num_packets):
+    for x in range(num_packets+1):
         timers.append(Timer(TIMEOUT_INTERVAL))
 
     while base < num_packets:
@@ -68,7 +68,7 @@ def send(sock, filename, drop_prob):
         while timers[base].running() and not timers[base].timeout():
             mutex.release()
             print('Sleeping')
-            time.sleep(SLEEP_INTERVAL)
+            # time.sleep(SLEEP_INTERVAL)
             mutex.acquire()
 
         if timers[base].timeout():
@@ -97,7 +97,7 @@ def receive(sock):
         if ack >= base:
             mutex.acquire()
             base = ack + 1
-            if timers[base].running():
+            if timers[base] is not None and timers[base].running():
                 timers[base].stop()
             mutex.release()
 

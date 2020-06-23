@@ -32,7 +32,7 @@ def send(sock, filename, drop_prob):
     while True:
         if next_to_send < len(packets):
             udt.send(packets[next_to_send], sock, RECEIVER_ADDR, drop_prob)
-            # time.sleep(SLEEP_INTERVAL)
+            time.sleep(SLEEP_INTERVAL)
             next_to_send += 1
             print("sent: " + str(next_to_send))
         else:
