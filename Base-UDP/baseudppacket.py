@@ -7,4 +7,4 @@ def make_datagram(data=b''):
 
 
 def extract_datagram(packet):
-    return packet[4:]
+    return packet

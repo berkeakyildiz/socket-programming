@@ -5,7 +5,7 @@ import sys
 import baseudppacket as packet
 import baseudpudt as udt
 
-RECEIVER_ADDR = ('localhost', 8080)
+RECEIVER_ADDR = ('localhost', 9502)
 
 
 def receive(sock, filename):
@@ -14,14 +14,21 @@ def receive(sock, filename):
     except IOError:
         print('Unable to open', filename)
         return
-
+    pkt_count = 0
+    start_time = time.time()
     while True:
         pkt, addr = udt.recv(sock)
-        print(pkt)
+        if pkt_count == 0:
+            start_time = time.time()
+            print("Start time: " + str(start_time))
         if not pkt:
             break
         data = packet.extract_datagram(pkt)
         file.write(data)
+        pkt_count += 1
+        print("received: " + str(pkt_count))
+
+        print("--- %s seconds ---" % (time.time() - start_time))
     file.close()
 
 
@@ -33,8 +40,6 @@ if __name__ == '__main__':
     #     exit()
     # filename = sys.argv[1]
     filename = "/home/bakyildiz/PycharmProjects/socket-programming/received-data/received_small_data.txt"
-    start_time = time.time()
     print("READY TO RECEIVE")
     receive(sock, filename)
     sock.close()
-    print("--- %s seconds ---" % (time.time() - start_time))

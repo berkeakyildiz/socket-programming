@@ -6,8 +6,8 @@ import baseudppacket as packet
 import baseudpudt as udt
 
 PACKET_SIZE = 1024
-RECEIVER_ADDR = ('localhost', 8080)
-SENDER_ADDR = ('localhost', 0)
+RECEIVER_ADDR = ('localhost', 9502)
+SENDER_ADDR = ('localhost', 9501)
 SLEEP_INTERVAL = 0.05
 
 
@@ -25,16 +25,21 @@ def send(sock, filename):
             break
         packets.append(packet.make_datagram(data))
 
-    # Send empty packet as sentinel
-    udt.send(packet.make_empty(), sock, RECEIVER_ADDR)
+    # # Send empty packet as sentinel
+    # udt.send(packet.make_empty(), sock, RECEIVER_ADDR)
     file.close()
     next_to_send = 0
 
+    start_time = time.time()
     while True:
-        udt.send(packets[next_to_send], sock, RECEIVER_ADDR)
-        time.sleep(SLEEP_INTERVAL)
-        next_to_send += 1
-        print("sent: " + str(next_to_send))
+        if next_to_send < len(packets):
+            udt.send(packets[next_to_send], sock, RECEIVER_ADDR)
+            time.sleep(SLEEP_INTERVAL)
+            next_to_send += 1
+            print("sent: " + str(next_to_send))
+        else:
+            break
+    print("--- %s seconds ---" % (time.time() - start_time))
 
 
 if __name__ == '__main__':
@@ -45,8 +50,6 @@ if __name__ == '__main__':
     #     exit()
     # filename = sys.argv[1]
     filename = "/home/bakyildiz/PycharmProjects/socket-programming/data/small-data.txt"
-    start_time = time.time()
     print("READY TO SEND")
     send(sock, filename)
     sock.close()
-    print("--- %s seconds ---" % (time.time() - start_time))
